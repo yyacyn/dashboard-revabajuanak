@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router";
+import { useEffect } from "react";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -12,20 +13,39 @@ import Buttons from "./pages/UiElements/Buttons";
 import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
+import ProductTable from "./pages/Tables/ProductTable";
 import FormElements from "./pages/Forms/FormElements";
+import AddProduct from "./pages/Forms/AddProducts";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-export default function App() {
+// Add the PathTracker component in the same file
+import { ReactNode } from "react";
+
+const PathTracker = ({ children }: { children: ReactNode }) => {
+  const location = useLocation();
+  const { setLastPath } = useAuth();
+
+  useEffect(() => {
+    if (location.pathname !== "/signin" && location.pathname !== "/signup") {
+      setLastPath(location.pathname);
+    }
+  }, [location, setLastPath]);
+
+  return <>{children}</>;
+};
+
+// Modified App component that includes PathTracker
+const AppWithAuth = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <ScrollToTop />
+    <Router>
+      <ScrollToTop />
+      <PathTracker>
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
@@ -75,12 +95,21 @@ export default function App() {
               }
             />
 
-            {/* Tables */}
             <Route
-              path="/basic-tables"
+              path="/add-product"
               element={
                 <ProtectedRoute>
-                  <BasicTables />
+                  <AddProduct />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Tables */}
+            <Route
+              path="/product-table"
+              element={
+                <ProtectedRoute>
+                  <ProductTable />
                 </ProtectedRoute>
               }
             />
@@ -161,7 +190,15 @@ export default function App() {
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
+      </PathTracker>
+    </Router>
+  );
+};
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppWithAuth />
     </AuthProvider>
   );
 }

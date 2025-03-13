@@ -14,13 +14,14 @@ export default function SignInForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, login, lastPath } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/"); // Redirect to the dashboard if already authenticated
+      // Redirect to the last visited path or dashboard if no last path
+      navigate(lastPath || "/");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, lastPath]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

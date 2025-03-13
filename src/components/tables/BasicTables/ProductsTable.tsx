@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Table,
     TableBody,
@@ -9,6 +9,7 @@ import {
 import Badge from "../../ui/badge/Badge";
 import Button from "../../ui/button/Button";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 interface Product {
     id: number;
@@ -18,59 +19,71 @@ interface Product {
     tag: string;
     price: number;
     quantity: number;
-    status: string;
+    // status: string;
     image: string;
 }
 
-// Sample data for the table
-const initialProducts: Product[] = [
-    {
-        id: 1,
-        name: "Product 1",
-        description: "Description 1",
-        category: "Category 1",
-        tag: "Tag 1",
-        price: 100,
-        quantity: 10,
-        status: "Active",
-        image: "/images/product1.jpg",
-    },
-    {
-        id: 2,
-        name: "Product 2",
-        description: "Description 2",
-        category: "Category 2",
-        tag: "Tag 2",
-        price: 200,
-        quantity: 20,
-        status: "Pending",
-        image: "/images/product2.jpg",
-    },
-    {
-        id: 3,
-        name: "Product 3",
-        description: "Description 3",
-        category: "Category 3",
-        tag: "Tag 3",
-        price: 300,
-        quantity: 30,
-        status: "Inactive",
-        image: "/images/product3.jpg",
-    },
-];
-
 export default function ProductsTable() {
-    const [products, setProducts] = useState<Product[]>(initialProducts);
+    const [products, setProducts] = useState<Product[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 10;
+
+    useEffect(() => {
+        fetch("http://localhost:8000/products")
+            .then((response) => response.json())
+            .then((data) => {
+                const fetchedProducts = data.products.map((product: any) => ({
+                    id: product.ID,
+                    name: product.nama_produk,
+                    description: product.deskripsi,
+                    category: product.kategori,
+                    tag: product.tag,
+                    price: product.harga,
+                    quantity: product.jumlah,
+                    // status: "Active", // Assuming all fetched products are active
+                    image: product.image,
+                }));
+                setProducts(fetchedProducts);
+            })
+            .catch((error) => console.error("Error fetching products:", error));
+    }, []);
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
     };
 
     const handleDelete = (id: number) => {
-        setProducts(products.filter((product) => product.id !== id));
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`http://localhost:8000/delproducts/${id}`, {
+                    method: 'DELETE',
+                })
+                    .then((response) => {
+                        if (response.ok) {
+                            setProducts(products.filter((product) => product.id !== id));
+                            Swal.fire(
+                                'Deleted!',
+                                'Your product has been deleted.',
+                                'success'
+                            );
+                        } else {
+                            console.error("Error deleting product:", response.statusText);
+                        }
+                    })
+                    .catch((error) => console.error("Error deleting product:", error));
+            }
+        });
     };
 
     const handleEdit = (product: Product) => {
@@ -80,14 +93,14 @@ export default function ProductsTable() {
 
     const handleAddProduct = () => {
         setEditingProduct({
-            id: products.length + 1,
+            id: 0, // Set id to 0 for new product
             name: "",
             description: "",
             category: "",
             tag: "",
             price: 0,
             quantity: 0,
-            status: "Active",
+            // status: "Active",
             image: "",
         });
         setIsModalOpen(true);
@@ -95,13 +108,69 @@ export default function ProductsTable() {
 
     const handleSave = () => {
         if (editingProduct) {
-            setProducts(
-                products.map((product) =>
-                    product.id === editingProduct.id ? editingProduct : product
-                )
-            );
-            setEditingProduct(null);
-            setIsModalOpen(false);
+            if (editingProduct.id === 0) {
+                // Add new product
+                fetch("http://localhost:8000/addproducts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        nama_produk: editingProduct.name,
+                        deskripsi: editingProduct.description,
+                        kategori: editingProduct.category,
+                        tag: editingProduct.tag,
+                        harga: editingProduct.price,
+                        jumlah: editingProduct.quantity,
+                        image: editingProduct.image,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        setProducts([...products, { ...editingProduct, id: data.id }]);
+                        setEditingProduct(null);
+                        setIsModalOpen(false);
+                        Swal.fire(
+                            'Added!',
+                            'Your product has been added.',
+                            'success'
+                        );
+                    })
+                    .catch((error) => console.error("Error adding product:", error));
+            } else {
+                // Edit existing product
+                fetch(`http://localhost:8000/editproducts/${editingProduct.id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        nama_produk: editingProduct.name,
+                        deskripsi: editingProduct.description,
+                        kategori: editingProduct.category,
+                        tag: editingProduct.tag,
+                        harga: editingProduct.price,
+                        jumlah: editingProduct.quantity,
+                        image: editingProduct.image,
+                    }),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        setProducts(
+                            products.map((product) =>
+                                product.id === editingProduct.id ? editingProduct : product
+                            )
+                        );
+                        setEditingProduct(null);
+                        setIsModalOpen(false);
+                        Swal.fire(
+                            'Updated!',
+                            'Your product has been updated.',
+                            'success'
+                        );
+                    })
+                    .catch((error) => console.error("Error updating product:", error));
+            }
         }
     };
 
@@ -114,27 +183,41 @@ export default function ProductsTable() {
         product.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const indexOfLastProduct = currentPage * productsPerPage;
+    const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+    const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+
+    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+    const handlePreviousPage = () => {
+        setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
+    };
+
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="max-w-full overflow-x-auto">
                 <div className="min-w-[1102px]">
-                    <div className="p-4  flex items-center justify-between gap-5">
+                    <div className="p-4 flex justify-between items-center">
                         <input
                             type="text"
-                            className="w-[85%] px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"
+                            className="w-auto px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700"
                             placeholder="Search products..."
                             value={searchQuery}
                             onChange={handleSearch}
                         />
-                        <Button 
+                        <Button
                             onClick={handleAddProduct}
-                            className="bg-green-500 hover:bg-green-600 py-[12px]"
+                            className="ml-4 bg-green-500 hover:bg-green-600 text-white flex items-center gap-1 py-[10px]"
                         >
-                            <FaPlus className="flex justify-center"/>
+                            <FaPlus />
                             Add Product
                         </Button>
                     </div>
-                    <Table>
+                    <Table className="table-auto w-full">
                         {/* Table Header */}
                         <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                             <TableRow>
@@ -180,12 +263,7 @@ export default function ProductsTable() {
                                 >
                                     Quantity
                                 </TableCell>
-                                <TableCell
-                                    isHeader
-                                    className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
-                                >
-                                    Status
-                                </TableCell>
+
                                 <TableCell
                                     isHeader
                                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -196,63 +274,59 @@ export default function ProductsTable() {
                         </TableHeader>
 
                         {/* Table Body */}
-                        <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                            {filteredProducts.map((product) => (
+                        <TableBody className="divide-y table-auto w-full divide-gray-100 dark:divide-white/[0.05]">
+                            {currentProducts.map((product) => (
                                 <TableRow key={product.id}>
-                                    <TableCell className="px-5 py-4 sm:px-6 text-start">
+                                    <TableCell className="px-0 py-4 w-auto sm:px-6 mx-0 whitespace-nowrap">
                                         <img
                                             src={product.image}
                                             alt={product.name}
-                                            className="w-16 h-16 object-cover rounded"
+                                            className="w-20 h-20 object-cover rounded"
                                         />
                                     </TableCell>
-                                    <TableCell className="px-5 py-4 sm:px-6 text-start">
-                                        {product.name}
+                                    <TableCell className="py-2 sm:px-6 text-start text-theme-sm whitespace-normal break-words">
+                                        <div className="whitespace-normal break-words max-w-[175px] dark:text-white">
+                                            {product.name}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        {product.description}
+                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
+                                        <div className="whitespace-normal break-words max-w-[200px]">
+                                            {product.description}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        {product.category}
+                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
+                                        <div className="whitespace-normal break-words max-w-[80px]">
+                                            {product.category}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        {product.tag}
+                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
+                                        <div className="whitespace-normal break-words max-w-[80px]">
+                                            {product.tag}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        {product.price}
+                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
+                                        <div className="whitespace-normal break-words max-w-[100px]">
+                                            Rp. {product.price}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        {product.quantity}
+                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
+                                        <div className="whitespace-normal break-words max-w-[50px]">
+                                            {product.quantity}
+                                        </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        <Badge
-                                            size="sm"
-                                            color={
-                                                product.status === "Active"
-                                                    ? "success"
-                                                    : product.status === "Pending"
-                                                        ? "warning"
-                                                        : "error"
-                                            }
-                                        >
-                                            {product.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        <div className="flex gap-2">
-                                            <Button 
+                                    <TableCell className="px-2 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                        <div className="flex gap-1">
+                                            <Button
                                                 onClick={() => handleEdit(product)}
                                                 className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-1"
                                             >
                                                 <FaEdit />
-                                                
                                             </Button>
-                                            <Button 
+                                            <Button
                                                 onClick={() => handleDelete(product.id)}
                                                 className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-1"
                                             >
                                                 <FaTrash />
-                                                
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -260,19 +334,52 @@ export default function ProductsTable() {
                             ))}
                         </TableBody>
                     </Table>
+                    <div className="flex justify-between items-center p-4">
+                        <Button
+                            onClick={handlePreviousPage}
+                            disabled={currentPage === 1}
+                            className="bg-gray-500 hover:bg-gray-600 text-white"
+                        >
+                            Previous
+                        </Button>
+                        <span className="dark:text-white">
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <Button
+                            onClick={handleNextPage}
+                            disabled={currentPage === totalPages}
+                            className="bg-gray-500 hover:bg-gray-600 text-white"
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             {/* Edit Product Modal */}
             {isModalOpen && editingProduct && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 mt-20">
-                    <div className="bg-white p-6 rounded-md shadow-md w-1/2">
-                    <h2 className="text-xl font-bold mb-4">{editingProduct.id > products.length ? "Add Product" : "Edit Product"}</h2>
-                        <div className="mb-4">
+                    <div className="bg-white p-4 rounded-md shadow-md w-1/3"> {/* Adjusted width and padding */}
+                        <h2 className="text-xl font-bold mb-4">{editingProduct.id === 0 ? "Add Product" : "Edit Product"}</h2>
+                        <div className="mb-2"> {/* Adjusted margin */}
+                            <label className="block text-gray-700">Image</label>
+                            <input
+                                type="text"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value={editingProduct.image}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                    setEditingProduct({
+                                        ...editingProduct,
+                                        image: e.target.value,
+                                    })
+                                }
+                            />
+                        </div>
+                        <div className="mb-2"> {/* Adjusted margin */}
                             <label className="block text-gray-700">Name</label>
                             <input
                                 type="text"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={editingProduct.name}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                     setEditingProduct({
@@ -282,25 +389,25 @@ export default function ProductsTable() {
                                 }
                             />
                         </div>
-                        <div className="mb-4">
+                        <div className="mb-2"> {/* Adjusted margin */}
                             <label className="block text-gray-700">Description</label>
-                            <input
-                                type="text"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            <textarea
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={editingProduct.description}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                                     setEditingProduct({
                                         ...editingProduct,
                                         description: e.target.value,
                                     })
                                 }
+                                rows={4}
                             />
                         </div>
-                        <div className="mb-4">
+                        <div className="mb-2"> {/* Adjusted margin */}
                             <label className="block text-gray-700">Category</label>
                             <input
                                 type="text"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={editingProduct.category}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                     setEditingProduct({
@@ -310,11 +417,11 @@ export default function ProductsTable() {
                                 }
                             />
                         </div>
-                        <div className="mb-4">
+                        <div className="mb-2"> {/* Adjusted margin */}
                             <label className="block text-gray-700">Tag</label>
                             <input
                                 type="text"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={editingProduct.tag}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                     setEditingProduct({
@@ -324,11 +431,11 @@ export default function ProductsTable() {
                                 }
                             />
                         </div>
-                        <div className="mb-4">
+                        <div className="mb-2"> {/* Adjusted margin */}
                             <label className="block text-gray-700">Price</label>
                             <input
                                 type="number"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={editingProduct.price}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                     setEditingProduct({
@@ -338,11 +445,11 @@ export default function ProductsTable() {
                                 }
                             />
                         </div>
-                        <div className="mb-4">
+                        <div className="mb-2"> {/* Adjusted margin */}
                             <label className="block text-gray-700">Quantity</label>
                             <input
                                 type="number"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={editingProduct.quantity}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                     setEditingProduct({
@@ -353,13 +460,13 @@ export default function ProductsTable() {
                             />
                         </div>
                         <div className="flex justify-end gap-2">
-                            <Button 
+                            <Button
                                 onClick={handleSave}
                                 className="bg-green-500 hover:bg-green-600 text-white"
                             >
                                 Save
                             </Button>
-                            <Button 
+                            <Button
                                 onClick={handleCloseModal}
                                 className="bg-gray-500 hover:bg-gray-600 text-white"
                             >
