@@ -1,17 +1,17 @@
 import { useState } from "react";
-import ComponentCard from "../../common/ComponentCard";
+// import ComponentCard from "../../common/ComponentCard";
 import Label from "../Label";
 import Input from "../input/InputField";
 import FileInput from "../input/FileInput";
 import Select from "../Select";
 import TextArea from "../input/TextArea";
-import { CalenderIcon, EyeCloseIcon, EyeIcon, TimeIcon } from "../../../icons";
-import Flatpickr from "react-flatpickr";
+// import { CalenderIcon, EyeCloseIcon, EyeIcon, TimeIcon } from "../../../icons";
+// import Flatpickr from "react-flatpickr";
 
 export default function DefaultInputs() {
     const [message, setMessage] = useState("");
-    const [messageTwo, setMessageTwo] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
+    // const [messageTwo, setMessageTwo] = useState("");
+    // const [showPassword, setShowPassword] = useState(false);
     const options = [
         { value: "baju", label: "Baju" },
         { value: "celana", label: "Celana" },
@@ -20,11 +20,11 @@ export default function DefaultInputs() {
     const handleSelectChange = (value: string) => {
         console.log("Selected value:", value);
     };
-    const [dateOfBirth, setDateOfBirth] = useState("");
+    // const [dateOfBirth, setDateOfBirth] = useState("");
 
-    const handleDateChange = (date: Date[]) => {
-        setDateOfBirth(date[0].toLocaleDateString()); // Handle selected date and format it
-    };
+    // const handleDateChange = (date: Date[]) => {
+    //     setDateOfBirth(date[0].toLocaleDateString()); // Handle selected date and format it
+    // };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];

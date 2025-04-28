@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+// import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
-import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
+// import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
+import { EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
-import Checkbox from "../form/input/Checkbox";
+// import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { useAuth } from "../../context/AuthContext";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  // const [isChecked, setIsChecked] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();

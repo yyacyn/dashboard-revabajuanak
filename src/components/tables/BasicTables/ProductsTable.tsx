@@ -6,7 +6,7 @@ import {
     TableHeader,
     TableRow,
 } from "../../ui/table";
-import Badge from "../../ui/badge/Badge";
+// import Badge from "../../ui/badge/Badge";
 import Button from "../../ui/button/Button";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -155,7 +155,7 @@ export default function ProductsTable() {
                     }),
                 })
                     .then((response) => response.json())
-                    .then((data) => {
+                    .then(() => {
                         setProducts(
                             products.map((product) =>
                                 product.id === editingProduct.id ? editingProduct : product
