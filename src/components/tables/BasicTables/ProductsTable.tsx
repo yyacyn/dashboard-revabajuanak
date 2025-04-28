@@ -180,7 +180,8 @@ export default function ProductsTable() {
     };
 
     const filteredProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase()) 
     );
 
     const indexOfLastProduct = currentPage * productsPerPage;
@@ -209,6 +210,7 @@ export default function ProductsTable() {
                             value={searchQuery}
                             onChange={handleSearch}
                         />
+                        
                         <Button
                             onClick={handleAddProduct}
                             className="ml-4 bg-green-500 hover:bg-green-600 text-white flex items-center gap-1 py-[10px]"

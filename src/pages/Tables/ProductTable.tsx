@@ -9,7 +9,7 @@ export default function BasicTables() {
     <>
       <PageMeta
         title="Tabel Produk"
-        description="This is React.js Basic Tables Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
+        description="yep"
       />
       <PageBreadcrumb pageTitle="Tabel Produk" />
       <div className="space-y-6">
