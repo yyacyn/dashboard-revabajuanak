@@ -12,7 +12,7 @@ import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 interface Product {
-    id: number;
+    id: number | string;
     name: string;
     description: string;
     category: string;
@@ -106,6 +106,33 @@ export default function ProductsTable() {
         setIsModalOpen(true);
     };
 
+    const handleFileUpload = async (productId: number, files: FileList | null) => {
+        if (!files) return;
+
+        console.log("Uploading files for product ID:", productId); // Debug the product ID
+        const formData = new FormData();
+        Array.from(files).forEach((file) => {
+            formData.append("images", file); // "images" matches the backend key
+        });
+
+        try {
+            const response = await fetch(`http://localhost:8000/upload/products/${productId}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                
+            } else {
+                console.error("Error uploading files:", response.statusText);
+                Swal.fire("Error!", "Failed to upload files.", "error");
+            }
+        } catch (error) {
+            console.error("Error uploading files:", error);
+            Swal.fire("Error!", "An error occurred while uploading files.", "error");
+        }
+    };
+
     const handleSave = () => {
         if (editingProduct) {
             if (editingProduct.id === 0) {
@@ -122,21 +149,33 @@ export default function ProductsTable() {
                         tag: editingProduct.tag,
                         harga: editingProduct.price,
                         jumlah: editingProduct.quantity,
-                        image: editingProduct.image,
+                        image: editingProduct.image || "", // Use existing image or empty
                     }),
                 })
-                    .then((response) => response.json())
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Failed to add product");
+                        }
+                        return response.json();
+                    })
                     .then((data) => {
-                        setProducts([...products, { ...editingProduct, id: data.id }]);
+                        const productId = data.product.ID;
+                        setProducts([...products, { ...editingProduct, id: productId, image: productId.toString() }]);
                         setEditingProduct(null);
                         setIsModalOpen(false);
-                        Swal.fire(
-                            'Added!',
-                            'Your product has been added.',
-                            'success'
-                        );
+    
+                        // Call handleFileUpload to upload files after adding the product
+                        const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+                        if (fileInput?.files?.length) {
+                            handleFileUpload(productId, fileInput.files);
+                        }
+    
+                        Swal.fire("Added!", "Your product has been added.", "success");
                     })
-                    .catch((error) => console.error("Error adding product:", error));
+                    .catch((error) => {
+                        console.error("Error adding product:", error);
+                        Swal.fire("Error!", "Failed to add product.", "error");
+                    });
             } else {
                 // Edit existing product
                 fetch(`http://localhost:8000/editproducts/${editingProduct.id}`, {
@@ -151,25 +190,39 @@ export default function ProductsTable() {
                         tag: editingProduct.tag,
                         harga: editingProduct.price,
                         jumlah: editingProduct.quantity,
-                        image: editingProduct.image,
+                        image: editingProduct.id.toString(), // Set image to the product ID
                     }),
                 })
-                    .then((response) => response.json())
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error("Failed to edit product");
+                        }
+                        return response.json();
+                    })
                     .then(() => {
                         setProducts(
                             products.map((product) =>
-                                product.id === editingProduct.id ? editingProduct : product
+                                product.id === editingProduct.id
+                                    ? { ...editingProduct, image: editingProduct.id.toString() }
+                                    : product
                             )
                         );
+    
+                        // Upload the new image if a file is selected
+                        const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+                        if (fileInput?.files?.length) {
+                            handleFileUpload(Number(editingProduct.id), fileInput.files);
+                        }
+    
                         setEditingProduct(null);
                         setIsModalOpen(false);
-                        Swal.fire(
-                            'Updated!',
-                            'Your product has been updated.',
-                            'success'
-                        );
+    
+                        Swal.fire("Updated!", "Your product has been updated.", "success");
                     })
-                    .catch((error) => console.error("Error updating product:", error));
+                    .catch((error) => {
+                        console.error("Error editing product:", error);
+                        Swal.fire("Error!", "Failed to edit product.", "error");
+                    });
             }
         }
     };
@@ -181,7 +234,7 @@ export default function ProductsTable() {
 
     const filteredProducts = products.filter((product) =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase()) 
+        product.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const indexOfLastProduct = currentPage * productsPerPage;
@@ -210,7 +263,7 @@ export default function ProductsTable() {
                             value={searchQuery}
                             onChange={handleSearch}
                         />
-                        
+
                         <Button
                             onClick={handleAddProduct}
                             className="ml-4 bg-green-500 hover:bg-green-600 text-white flex items-center gap-1 py-[10px]"
@@ -281,9 +334,12 @@ export default function ProductsTable() {
                                 <TableRow key={product.id}>
                                     <TableCell className="px-0 py-4 w-auto sm:px-6 mx-0 whitespace-nowrap">
                                         <img
-                                            src={product.image}
+                                            src={`http://localhost:8000/uploads/products/${product.image}/1.jpg` || "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1200px-No-Image-Placeholder.svg.png"}
                                             alt={product.name}
                                             className="w-20 h-20 object-cover rounded"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1200px-No-Image-Placeholder.svg.png";
+                                            }}
                                         />
                                     </TableCell>
                                     <TableCell className="py-2 sm:px-6 text-start text-theme-sm whitespace-normal break-words">
@@ -292,7 +348,7 @@ export default function ProductsTable() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
-                                        <div className="whitespace-normal break-words max-w-[200px]">
+                                        <div className="whitespace-normal break-words max-w-[200px] line-clamp-3 overflow-hidden text-ellipsis">
                                             {product.description}
                                         </div>
                                     </TableCell>
@@ -325,7 +381,7 @@ export default function ProductsTable() {
                                                 <FaEdit />
                                             </Button>
                                             <Button
-                                                onClick={() => handleDelete(product.id)}
+                                                onClick={() => handleDelete(Number(product.id))}
                                                 className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-1"
                                             >
                                                 <FaTrash />
@@ -364,17 +420,20 @@ export default function ProductsTable() {
                     <div className="bg-white p-4 rounded-md shadow-md w-1/3"> {/* Adjusted width and padding */}
                         <h2 className="text-xl font-bold mb-4">{editingProduct.id === 0 ? "Add Product" : "Edit Product"}</h2>
                         <div className="mb-2"> {/* Adjusted margin */}
-                            <label className="block text-gray-700">Image</label>
+                            <label className="block text-gray-700">Images</label>
                             <input
-                                type="text"
+                                type="file"
+                                multiple // Allow multiple file selection
                                 className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={editingProduct.image}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                    setEditingProduct({
-                                        ...editingProduct,
-                                        image: e.target.value,
-                                    })
-                                }
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    if (e.target.files) {
+                                        const files = Array.from(e.target.files).map((file) => URL.createObjectURL(file));
+                                        setEditingProduct({
+                                            ...editingProduct,
+                                            image: files.join(", "), // Store file URLs as a comma-separated string
+                                        });
+                                    }
+                                }}
                             />
                         </div>
                         <div className="mb-2"> {/* Adjusted margin */}
