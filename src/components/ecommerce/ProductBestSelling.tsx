@@ -37,7 +37,7 @@ function ProductBestSelling() {
                   <img src="./images/user/atmint.jpg" alt="Product" />
                 </div>
               </td>
-              <td className='px-4 py-3'>fufufafa 1</td>
+              <td className='px-4 py-3'>fufufafa 2</td>
               <td className='px-4 py-3 whitespace-normal break-words max-w-[150px]'>fufufafa adalah</td>
               <td className='px-4 py-3'>fufafufa</td>
               <td className='px-4 py-3'>50.000</td>
