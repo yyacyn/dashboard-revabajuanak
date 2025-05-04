@@ -9,7 +9,7 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  ListIcon,
+  // ListIcon,
   PageIcon,
   PieChartIcon,
   PlugInIcon,
@@ -42,17 +42,10 @@ const navItems: NavItem[] = [
   //   name: "User Profile",
   //   path: "/profile",
   // },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
   // {
-  //   name: "Products",
-  //   icon: <BoxCubeIcon/>,
-  //   subItems: [{ name: "Product List", path: "/product-table", pro: false },
-  //     {name: "Add Product", path: "/add-product", pro: false }
-  //   ],
+  //   name: "Forms",
+  //   icon: <ListIcon />,
+  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
   // },
   {
     name: "Products",
@@ -63,8 +56,7 @@ const navItems: NavItem[] = [
     name: "Pages",
     icon: <PageIcon />,
     subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
+      { name: "website", path: "https://reva-baju.vercel.app/", pro: false },
     ],
   },
 ];
@@ -202,7 +194,7 @@ const AppSidebar: React.FC = () => {
                   className={`ml-auto w-5 h-5 transition-transform duration-200 ${
                     openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
+                      ? "rotate-180 text-white"
                       : ""
                   }`}
                 />
@@ -315,23 +307,23 @@ const AppSidebar: React.FC = () => {
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
+                className="dark:hidden ml-20"
+                src="/images/logo/reva-logo.png"
                 alt="Logo"
-                width={150}
+                width={80}
                 height={40}
               />
               <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
+                className="hidden dark:block ml-20"
+                src="/images/logo/reva-logo.png"
                 alt="Logo"
-                width={150}
+                width={85}
                 height={40}
               />
             </>
           ) : (
             <img
-              src="/images/logo/logo-icon.svg"
+              src="/images/logo/reva-logo.png"
               alt="Logo"
               width={32}
               height={32}
