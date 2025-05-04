@@ -167,7 +167,24 @@ export default function ProductsTable() {
                         // Call handleFileUpload to upload files after adding the product
                         const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
                         if (fileInput?.files?.length) {
-                            handleFileUpload(productId, fileInput.files);
+                            handleFileUpload(productId, fileInput.files).then(() => {
+                                // Refresh the product list to update the image
+                                fetch("http://localhost:8000/products")
+                                    .then((response) => response.json())
+                                    .then((data) => {
+                                        const fetchedProducts = data.products.map((product: any) => ({
+                                            id: product.ID,
+                                            name: product.nama_produk,
+                                            description: product.deskripsi,
+                                            category: product.kategori,
+                                            tag: product.tag,
+                                            price: product.harga,
+                                            quantity: product.jumlah,
+                                            image: product.image,
+                                        }));
+                                        setProducts(fetchedProducts);
+                                    });
+                            });
                         }
     
                         Swal.fire("Added!", "Your product has been added.", "success");
@@ -211,7 +228,24 @@ export default function ProductsTable() {
                         // Upload the new image if a file is selected
                         const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
                         if (fileInput?.files?.length) {
-                            handleFileUpload(Number(editingProduct.id), fileInput.files);
+                            handleFileUpload(Number(editingProduct.id), fileInput.files).then(() => {
+                                // Refresh the product list to update the image
+                                fetch("http://localhost:8000/products")
+                                    .then((response) => response.json())
+                                    .then((data) => {
+                                        const fetchedProducts = data.products.map((product: any) => ({
+                                            id: product.ID,
+                                            name: product.nama_produk,
+                                            description: product.deskripsi,
+                                            category: product.kategori,
+                                            tag: product.tag,
+                                            price: product.harga,
+                                            quantity: product.jumlah,
+                                            image: product.image,
+                                        }));
+                                        setProducts(fetchedProducts);
+                                    });
+                            });
                         }
     
                         setEditingProduct(null);
