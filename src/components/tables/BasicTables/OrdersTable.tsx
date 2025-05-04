@@ -9,7 +9,7 @@ import {
 import Button from "../../ui/button/Button";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import RecentOrders from "../../ecommerce/RecentOrders";
+// import RecentOrders from "../../ecommerce/RecentOrders";
 
 
 // Extend jsPDF to include autoTable
