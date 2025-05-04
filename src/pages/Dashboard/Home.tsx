@@ -6,6 +6,7 @@ import MonthlySalesChart from "../../components/ecommerce/MonthlySalesChart";
 // import DemographicCard from "../../components/ecommerce/DemographicCard";
 import PageMeta from "../../components/common/PageMeta";
 import ProductBestSelling from "../../components/ecommerce/ProductBestSelling";
+import RecentOrders from "../../components/ecommerce/RecentOrders";
 
 export default function Home() {
   return (
@@ -22,6 +23,9 @@ export default function Home() {
         </div>
         <div className="col-span-12 xl:col-span-7">
           <ProductBestSelling />
+        </div>
+        <div className="col-span-12 xl:col-span-7">
+          <RecentOrders />
         </div>
       </div>
     </>

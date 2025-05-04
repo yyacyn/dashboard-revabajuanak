@@ -14,6 +14,7 @@ import LineChart from "./pages/Charts/LineChart";
 import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
 import ProductTable from "./pages/Tables/ProductTable";
+import OrderTable from "./pages/Tables/OrderTable";
 import FormElements from "./pages/Forms/FormElements";
 import AddProduct from "./pages/Forms/AddProducts";
 import Blank from "./pages/Blank";
@@ -110,6 +111,14 @@ const AppWithAuth = () => {
               element={
                 <ProtectedRoute>
                   <ProductTable />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/order-table"
+              element={
+                <ProtectedRoute>
+                  <OrderTable />
                 </ProtectedRoute>
               }
             />
