@@ -5,11 +5,7 @@ export default function ThemeTogglerTwo() {
   return (
     <button
       onClick={toggleTheme}
-<<<<<<< HEAD
       className="inline-flex items-center justify-center text-white transition-colors rounded-full size-14 bg-pink-400 hover:bg-pink-600"
-=======
-      className="inline-flex items-center justify-center text-white transition-colors rounded-full size-14 bg-brand-500 hover:bg-brand-600"
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
     >
       <svg
         className="hidden dark:block"

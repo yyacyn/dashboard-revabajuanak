@@ -42,19 +42,11 @@ const navItems: NavItem[] = [
   //   name: "User Profile",
   //   path: "/profile",
   // },
-<<<<<<< HEAD
   // {
   //   name: "Forms",
   //   icon: <ListIcon />,
   //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
   // },
-=======
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  },
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
   // {
   //   name: "Products",
   //   icon: <BoxCubeIcon/>,
@@ -71,18 +63,12 @@ const navItems: NavItem[] = [
     name: "Pages",
     icon: <PageIcon />,
     subItems: [
-<<<<<<< HEAD
       { name: "website", path: "https://reva-baju.vercel.app/", pro: false },
-=======
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
     ],
   },
 ];
 
 const othersItems: NavItem[] = [
-<<<<<<< HEAD
   // {
   //   icon: <PieChartIcon />,
   //   name: "Charts",
@@ -111,36 +97,6 @@ const othersItems: NavItem[] = [
   //     { name: "Sign Up", path: "/signup", pro: false },
   //   ],
   // },
-=======
-  {
-    icon: <PieChartIcon />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart", pro: false },
-      { name: "Bar Chart", path: "/bar-chart", pro: false },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts", pro: false },
-      { name: "Avatar", path: "/avatars", pro: false },
-      { name: "Badge", path: "/badge", pro: false },
-      { name: "Buttons", path: "/buttons", pro: false },
-      { name: "Images", path: "/images", pro: false },
-      { name: "Videos", path: "/videos", pro: false },
-    ],
-  },
-  {
-    icon: <PlugInIcon />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/signin", pro: false },
-      { name: "Sign Up", path: "/signup", pro: false },
-    ],
-  },
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
 ];
 
 const AppSidebar: React.FC = () => {
@@ -245,11 +201,7 @@ const AppSidebar: React.FC = () => {
                   className={`ml-auto w-5 h-5 transition-transform duration-200 ${
                     openSubmenu?.type === menuType &&
                     openSubmenu?.index === index
-<<<<<<< HEAD
                       ? "rotate-180 text-white"
-=======
-                      ? "rotate-180 text-brand-500"
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
                       : ""
                   }`}
                 />
@@ -362,7 +314,6 @@ const AppSidebar: React.FC = () => {
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img
-<<<<<<< HEAD
                 className="dark:hidden ml-20"
                 src="/images/logo/logo-reva.svg"
                 alt="Logo"
@@ -374,29 +325,12 @@ const AppSidebar: React.FC = () => {
                 src="/images/logo/logo-reva-dark.svg"
                 alt="Logo"
                 width={85}
-=======
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
                 height={40}
               />
             </>
           ) : (
             <img
-<<<<<<< HEAD
               src="/images/logo/logo-reva.svg"
-=======
-              src="/images/logo/logo-icon.svg"
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
               alt="Logo"
               width={32}
               height={32}
@@ -431,19 +365,11 @@ const AppSidebar: React.FC = () => {
                     : "justify-start"
                 }`}
               >
-<<<<<<< HEAD
                 {/* {isExpanded || isHovered || isMobileOpen ? (
                   "Others"
                 ) : (
                   <HorizontaLDots />
                 )} */}
-=======
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
-                ) : (
-                  <HorizontaLDots />
-                )}
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
               </h2>
               {renderMenuItems(othersItems, "others")}
             </div>

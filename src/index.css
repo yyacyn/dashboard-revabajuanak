@@ -15,11 +15,7 @@
     @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
   }
   .menu-item-active {
-<<<<<<< HEAD
     @apply bg-pink-500 text-white dark:bg-pink-500/[0.12] dark:text-pink-400;
-=======
-    @apply bg-brand-50 text-brand-500 dark:bg-brand-500/[0.12] dark:text-brand-400;
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
   }
   .menu-item-inactive {
     @apply text-gray-700 hover:bg-gray-100 group-hover:text-gray-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-300;
@@ -28,11 +24,7 @@
     @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400;
   }
   .menu-item-icon-active {
-<<<<<<< HEAD
     @apply text-white dark:text-pink-400;
-=======
-    @apply text-brand-500 dark:text-brand-400;
->>>>>>> 2856799797e71883868567c718f981220b02f1a8
   }
   .menu-item-icon-size svg {
     @apply size-6 !important;
@@ -45,7 +37,7 @@
     @apply relative;
   }
   .menu-item-arrow-active {
-    @apply rotate-180 text-brand-500 dark:text-brand-400;
+    @apply rotate-180 text-pink-500 dark:text-pink-400;
   }
   .menu-item-arrow-inactive {
     @apply text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300;
