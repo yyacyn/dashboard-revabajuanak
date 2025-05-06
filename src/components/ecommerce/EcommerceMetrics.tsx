@@ -24,21 +24,21 @@ export default function EcommerceMetrics() {
                     const now = new Date();
                     const currentMonth = now.getMonth();
                     const currentYear = now.getFullYear();
-
+    
                     // Extract unique orders
                     const uniqueOrders = new Map();
-                    data.order_details.forEach((detail: { Order: { ID: number; CreatedAt: string; total_harga: number } }) => {
+                    data.order_details.forEach((detail: { Order: { ID: number; CreatedAt: string; status: string; total_harga: number } }) => {
                         const order = detail.Order;
                         if (!uniqueOrders.has(order.ID)) {
                             uniqueOrders.set(order.ID, order);
                         }
                     });
-
+    
                     const ordersArray = Array.from(uniqueOrders.values());
-
+    
                     // Calculate metrics
                     const totalOrders = ordersArray.length;
-
+    
                     const ordersThisMonth = ordersArray.filter((order) => {
                         const orderDate = new Date(order.CreatedAt);
                         return (
@@ -46,17 +46,18 @@ export default function EcommerceMetrics() {
                             orderDate.getFullYear() === currentYear
                         );
                     }).length;
-
+    
                     const incomeThisMonth = ordersArray
                         .filter((order) => {
                             const orderDate = new Date(order.CreatedAt);
                             return (
                                 orderDate.getMonth() === currentMonth &&
-                                orderDate.getFullYear() === currentYear
+                                orderDate.getFullYear() === currentYear &&
+                                order.status === "success"
                             );
                         })
                         .reduce((total, order) => total + order.total_harga, 0);
-
+    
                     setMetrics((prevMetrics) => ({
                         ...prevMetrics,
                         totalOrders,
@@ -78,8 +79,8 @@ export default function EcommerceMetrics() {
                 if (Array.isArray(data.products)) {
                     // Calculate total quantity of all products
                     const totalProducts = data.products.reduce(
-                      (sum: number, product: Product) => sum + product.jumlah,
-                      0
+                        (sum: number, product: Product) => sum + product.jumlah,
+                        0
                     );
 
                     setMetrics((prevMetrics) => ({

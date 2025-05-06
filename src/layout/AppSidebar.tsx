@@ -18,7 +18,7 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import SidebarWidget from "./SidebarWidget";
-import { StoreIcon } from "lucide-react";
+import { ShirtIcon, StoreIcon } from "lucide-react";
 
 type NavItem = {
   name: string;
@@ -57,7 +57,7 @@ const navItems: NavItem[] = [
   // },
   {
     name: "Products",
-    icon: <BoxCubeIcon/>,
+    icon: <ShirtIcon/>,
     path: "/product-table"
   },
   {
