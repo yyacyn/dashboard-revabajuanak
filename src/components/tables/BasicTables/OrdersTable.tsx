@@ -43,7 +43,12 @@ export default function OrdersTable() {
             .then((response) => response.json())
             .then((data) => {
                 if (Array.isArray(data.order_details)) {
-                    const fetchedOrderDetails = data.order_details.map((order: any) => ({
+                    // Sort the order_details by the CreatedAt field in descending order
+                    const sortedOrderDetails = data.order_details.sort((a: any, b: any) => {
+                        return new Date(b.Order.CreatedAt).getTime() - new Date(a.Order.CreatedAt).getTime();
+                    });
+    
+                    const fetchedOrderDetails = sortedOrderDetails.map((order: any) => ({
                         id: order.ID,
                         invoice: order.Order.invoice,
                         product_name: order.Produk?.nama_produk || "N/A",
