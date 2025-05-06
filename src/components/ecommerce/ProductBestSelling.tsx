@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface Product {
     ID: number;
@@ -27,7 +26,7 @@ interface ProductSales {
 
 function ProductBestSelling() {
     const [products, setProducts] = useState<ProductSales[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -102,7 +101,7 @@ function ProductBestSelling() {
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                     Best Selling Products
                 </h2>
-                <div className="relative w-64">
+                {/* <div className="relative w-64">
                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
                         <Search size={18} />
                     </span>
@@ -113,7 +112,7 @@ function ProductBestSelling() {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                </div>
+                </div> */}
             </div>
 
             <div className="overflow-x-auto">

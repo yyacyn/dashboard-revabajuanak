@@ -6,10 +6,11 @@ import {
     TableHeader,
     TableRow,
 } from "../ui/table";
-// import Badge from "../ui/badge/Badge";
+import { FaSyncAlt } from "react-icons/fa"; // Import the refresh icon
 
 interface OrderDetail {
-    id: number;
+    id: number; // Order detail ID
+    order_id: number; // Order ID
     invoice: string;
     product_name: string;
     quantity: number;
@@ -25,13 +26,18 @@ export default function RecentOrders() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch recent orders from the API
+        fetchRecentOrders();
+    }, []);
+
+    const fetchRecentOrders = () => {
+        setLoading(true);
         fetch("http://localhost:8000/orders")
             .then((response) => response.json())
             .then((data) => {
                 if (Array.isArray(data.order_details)) {
                     const fetchedOrders = data.order_details.map((order: any) => ({
-                        id: order.ID,
+                        id: order.ID, // Order detail ID
+                        order_id: order.Order.ID, // Order ID
                         invoice: order.Order.invoice,
                         product_name: order.Produk?.nama_produk || "N/A",
                         quantity: order.total_produk,
@@ -42,7 +48,6 @@ export default function RecentOrders() {
                         date: new Date(order.Order.CreatedAt).toISOString(),
                     }));
 
-                    // Sort orders by date (most recent first) and limit to 5
                     const sortedOrders: OrderDetail[] = fetchedOrders
                         .sort(
                             (a: OrderDetail, b: OrderDetail) =>
@@ -57,7 +62,24 @@ export default function RecentOrders() {
             })
             .catch((error) => console.error("Error fetching recent orders:", error))
             .finally(() => setLoading(false));
-    }, []);
+    };
+
+    const handleStatusClick = async (order_id: number, status: string) => {
+        if (status === "pending") {
+            try {
+                const response = await fetch(`http://localhost:8000/payment/notification/${order_id}`, {
+                    method: "POST",
+                });
+                const data = await response.json();
+                console.log(data.message);
+
+                // Refresh the recent orders
+                fetchRecentOrders();
+            } catch (error) {
+                console.error("Error updating order status:", error);
+            }
+        }
+    };
 
     if (loading) {
         return <p>Loading recent orders...</p>;
@@ -136,17 +158,27 @@ export default function RecentOrders() {
                                     Rp. {order.total_price.toLocaleString()}
                                 </TableCell>
                                 <TableCell className="py-3 text-theme-sm">
-                                    <span
-                                        className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
-                                            order.status === "success"
-                                                ? "bg-green-500"
-                                                : order.status === "pending"
-                                                ? "bg-yellow-500"
-                                                : "bg-red-500"
-                                        }`}
-                                    >
-                                        {order.status}
-                                    </span>
+                                    {order.status === "pending" ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-2 py-1 rounded-full text-white text-xs font-medium bg-yellow-500">
+                                                {order.status}
+                                            </span>
+                                            <FaSyncAlt
+                                                className="text-yellow-500 cursor-pointer hover:text-yellow-600"
+                                                onClick={() => handleStatusClick(order.order_id, order.status)}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-white text-xs font-medium ${
+                                                order.status === "success"
+                                                    ? "bg-green-500"
+                                                    : "bg-red-500"
+                                            }`}
+                                        >
+                                            {order.status}
+                                        </span>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}

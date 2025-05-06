@@ -9,6 +9,7 @@ import {
 import Button from "../../ui/button/Button";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { FaSyncAlt } from "react-icons/fa"; // Import the refresh icon
 // import RecentOrders from "../../ecommerce/RecentOrders";
 
 
@@ -47,7 +48,7 @@ export default function OrdersTable() {
                     const sortedOrderDetails = data.order_details.sort((a: any, b: any) => {
                         return new Date(b.Order.CreatedAt).getTime() - new Date(a.Order.CreatedAt).getTime();
                     });
-    
+
                     const fetchedOrderDetails = sortedOrderDetails.map((order: any) => ({
                         id: order.ID,
                         invoice: order.Order.invoice,
@@ -69,6 +70,43 @@ export default function OrdersTable() {
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
+    };
+
+    const handleStatusClick = async (id: number, status: string) => {
+        if (status === "pending") {
+            try {
+                const response = await fetch(`http://localhost:8000/payment/notification/${id}`, {
+                    method: "POST",
+                });
+                const data = await response.json();
+                console.log(data.message);
+
+                // Refresh the table by re-fetching the data
+                const refreshedResponse = await fetch("http://localhost:8000/orders");
+                const refreshedData = await refreshedResponse.json();
+
+                if (Array.isArray(refreshedData.order_details)) {
+                    const sortedOrderDetails = refreshedData.order_details.sort((a: any, b: any) => {
+                        return new Date(b.Order.CreatedAt).getTime() - new Date(a.Order.CreatedAt).getTime();
+                    });
+
+                    const updatedOrderDetails = sortedOrderDetails.map((order: any) => ({
+                        id: order.ID,
+                        invoice: order.Order.invoice,
+                        product_name: order.Produk?.nama_produk || "N/A",
+                        quantity: order.total_produk,
+                        total_price: order.harga_total,
+                        status: order.Order.status,
+                        payment_method: order.Order.metode_pembayaran,
+                        buyer_name: order.Order.User?.UserDetail?.nama || "Unknown",
+                        date: new Date(order.Order.CreatedAt).toLocaleDateString(),
+                    }));
+                    setOrderDetails(updatedOrderDetails);
+                }
+            } catch (error) {
+                console.error("Error updating order status:", error);
+            }
+        }
     };
 
     const filteredOrderDetails = orderDetails.filter((detail) =>
@@ -118,7 +156,7 @@ export default function OrdersTable() {
         // Save the PDF
         doc.save(`orders_report_page_${currentPage}.pdf`);
     };
-    
+
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
             <div className="max-w-full overflow-x-auto">
@@ -222,15 +260,28 @@ export default function OrdersTable() {
                                     </TableCell>
                                     <TableCell
                                         className={`px-4 py-3 text-center text-theme-sm font-medium rounded ${detail.status === "cancelled"
-                                            ? "bg-red-100 text-red-500"
-                                            : detail.status === "pending"
-                                                ? "bg-yellow-100 text-yellow-500"
-                                                : detail.status === "success"
-                                                    ? "bg-green-100 text-green-500"
-                                                    : "bg-gray-100 text-gray-500"
+                                                ? "bg-red-100 text-red-500"
+                                                : detail.status === "pending"
+                                                    ? "bg-yellow-100 text-yellow-500 hover:bg-yellow-200"
+                                                    : detail.status === "success"
+                                                        ? "bg-green-100 text-green-500"
+                                                        : "bg-gray-100 text-gray-500"
                                             }`}
                                     >
-                                        {detail.status}
+                                        {detail.status === "pending" ? (
+                                            <div className="flex items-center justify-center gap-1 "onClick={() => handleStatusClick(detail.id, detail.status)}>
+                                                <button
+                                                    className="h-full"
+                                                >
+                                                    {detail.status}
+                                                </button>
+                                                <FaSyncAlt
+                                                    className="text-yellow-500 cursor-pointer"
+                                                />
+                                            </div>
+                                        ) : (
+                                            detail.status
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
