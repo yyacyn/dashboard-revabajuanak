@@ -30,6 +30,7 @@ export default function ProductsTable() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 10;
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
     useEffect(() => {
         fetch("http://localhost:8000/products")
@@ -53,6 +54,105 @@ export default function ProductsTable() {
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
+    };
+
+    const [isQtyModalOpen, setIsQtyModalOpen] = useState(false);
+    const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+    const [sizeQuantities, setSizeQuantities] = useState({
+        XS: 0,
+        S: 0,
+        M: 0,
+        L: 0,
+        XL: 0,
+    });
+
+    const openQuantityModal = (productId: number) => {
+        setSelectedProductId(productId);
+        setIsQtyModalOpen(true);
+
+        // Fetch existing quantities for the product
+        fetch(`http://localhost:8000/products/${productId}/sizes`)
+            .then((response) => response.json())
+            .then((data) => {
+                // Map the sizes from the response to the sizeQuantities state
+                const quantities = data.sizes.reduce((acc: any, size: any) => {
+                    acc[size.Ukuran] = size.Stok;
+                    return acc;
+                }, { XS: 0, S: 0, M: 0, L: 0, XL: 0 }); // Default values for all sizes
+
+                setSizeQuantities(quantities);
+            })
+            .catch((error) => console.error("Error fetching quantities:", error));
+    };
+
+    const getSizeId = (size: string): number => {
+        const sizeMap: { [key: string]: number } = {
+            XS: 1,
+            S: 2,
+            M: 3,
+            L: 4,
+            XL: 5,
+        };
+        return sizeMap[size] || 0; // Default to 0 if the size is not found
+    };
+
+    const handleSaveQuantities = () => {
+        if (selectedProductId) {
+            const payload = Object.entries(sizeQuantities).map(([size, quantity]) => ({
+                ukuran_id: getSizeId(size), // Map size name to size ID
+                stok: quantity,
+            }));
+
+            console.log("Payload being sent:", payload); // Log the payload
+
+            fetch(`http://localhost:8000/products/${selectedProductId}/sizes`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            })
+                .then((response) => {
+                    console.log("Response status:", response.status); // Log the response status
+                    if (!response.ok) {
+                        console.error("Response text:", response.statusText); // Log the response text
+                        throw new Error("Failed to update quantities");
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Response data:", data); // Log the response data
+                    setIsQtyModalOpen(false);
+                    Swal.fire("Updated!", "Quantities have been updated.", "success");
+
+                    // Refetch the products to update the list
+                    fetch("http://localhost:8000/products")
+                        .then((response) => response.json())
+                        .then((data) => {
+                            const fetchedProducts = data.products.map((product: any) => ({
+                                id: product.ID,
+                                name: product.nama_produk,
+                                description: product.deskripsi,
+                                category: product.kategori,
+                                tag: product.tag,
+                                price: product.harga,
+                                quantity: product.jumlah,
+                                image: product.image,
+                            }));
+                            setProducts(fetchedProducts);
+                        })
+                        .catch((error) => console.error("Error refetching products:", error));
+                })
+                .catch((error) => {
+                    console.error("Error updating quantities:", error);
+                    Swal.fire("Error!", "Failed to update quantities.", "error");
+                });
+        }
+    };
+
+    const handleCloseQtyModal = () => {
+        setIsQtyModalOpen(false);
+        setSelectedProductId(null);
     };
 
     const handleDelete = (id: number) => {
@@ -86,24 +186,37 @@ export default function ProductsTable() {
         });
     };
 
-    const handleEdit = (product: Product) => {
-        setEditingProduct(product);
-        setIsModalOpen(true);
-    };
-
     const handleAddProduct = () => {
         setEditingProduct({
             id: 0, // Set id to 0 for new product
             name: "",
             description: "",
             category: "",
-            tag: "",
+            tag: "N/A",
             price: 0,
             quantity: 0,
-            // status: "Active",
             image: "",
         });
+        setImagePreviews([]); // Reset previews
         setIsModalOpen(true);
+    };
+
+    const handleEdit = (product: Product) => {
+        setEditingProduct(product);
+        setImagePreviews([]); // Reset previews
+        setIsModalOpen(true);
+    };
+
+    const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files);
+            const previews = files.map((file) => URL.createObjectURL(file));
+            setImagePreviews(previews); // Set previews
+            setEditingProduct({
+                ...editingProduct!,
+                image: files.map((file) => file.name).join(", "), // Store file names
+            });
+        }
     };
 
     const handleFileUpload = async (productId: number, files: FileList | null) => {
@@ -122,7 +235,7 @@ export default function ProductsTable() {
             });
 
             if (response.ok) {
-                
+
             } else {
                 console.error("Error uploading files:", response.statusText);
                 Swal.fire("Error!", "Failed to upload files.", "error");
@@ -163,7 +276,7 @@ export default function ProductsTable() {
                         setProducts([...products, { ...editingProduct, id: productId, image: productId.toString() }]);
                         setEditingProduct(null);
                         setIsModalOpen(false);
-    
+
                         // Call handleFileUpload to upload files after adding the product
                         const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
                         if (fileInput?.files?.length) {
@@ -186,7 +299,7 @@ export default function ProductsTable() {
                                     });
                             });
                         }
-    
+
                         Swal.fire("Added!", "Your product has been added.", "success");
                     })
                     .catch((error) => {
@@ -224,7 +337,7 @@ export default function ProductsTable() {
                                     : product
                             )
                         );
-    
+
                         // Upload the new image if a file is selected
                         const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
                         if (fileInput?.files?.length) {
@@ -247,10 +360,10 @@ export default function ProductsTable() {
                                     });
                             });
                         }
-    
+
                         setEditingProduct(null);
                         setIsModalOpen(false);
-    
+
                         Swal.fire("Updated!", "Your product has been updated.", "success");
                     })
                     .catch((error) => {
@@ -334,12 +447,12 @@ export default function ProductsTable() {
                                 >
                                     Category
                                 </TableCell>
-                                <TableCell
+                                {/* <TableCell
                                     isHeader
                                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                                 >
-                                    Tag
-                                </TableCell>
+                                    Size
+                                </TableCell> */}
                                 <TableCell
                                     isHeader
                                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
@@ -350,7 +463,7 @@ export default function ProductsTable() {
                                     isHeader
                                     className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400"
                                 >
-                                    Quantity
+                                    Total Qty
                                 </TableCell>
 
                                 <TableCell
@@ -391,19 +504,27 @@ export default function ProductsTable() {
                                             {product.category}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
+                                    {/* <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
                                         <div className="whitespace-normal break-words max-w-[80px]">
                                             {product.tag}
                                         </div>
-                                    </TableCell>
+                                    </TableCell> */}
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
                                         <div className="whitespace-normal break-words max-w-[100px]">
                                             Rp. {product.price}
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 whitespace-normal break-words">
-                                        <div className="whitespace-normal break-words max-w-[50px]">
-                                            {product.quantity}
+                                        <div className="flex items-center gap-2">
+                                            <span className="whitespace-normal break-words max-w-[50px]">
+                                                {product.quantity}
+                                            </span>
+                                            <Button
+                                                onClick={() => openQuantityModal(Number(product.id))}
+                                                className="bg-blue-500 hover:bg-blue-600 text-white flex items-center p-1"
+                                            >
+                                                <FaEdit />
+                                            </Button>
                                         </div>
                                     </TableCell>
                                     <TableCell className="px-2 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
@@ -451,26 +572,29 @@ export default function ProductsTable() {
             {/* Edit Product Modal */}
             {isModalOpen && editingProduct && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 mt-20">
-                    <div className="bg-white p-4 rounded-md shadow-md w-1/3"> {/* Adjusted width and padding */}
+                    <div className="bg-white p-4 rounded-md shadow-md w-1/3">
                         <h2 className="text-xl font-bold mb-4">{editingProduct.id === 0 ? "Add Product" : "Edit Product"}</h2>
-                        <div className="mb-2"> {/* Adjusted margin */}
+                        <div className="mb-2">
                             <label className="block text-gray-700">Images</label>
                             <input
                                 type="file"
-                                multiple // Allow multiple file selection
+                                multiple
                                 className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                                    if (e.target.files) {
-                                        const files = Array.from(e.target.files).map((file) => URL.createObjectURL(file));
-                                        setEditingProduct({
-                                            ...editingProduct,
-                                            image: files.join(", "), // Store file URLs as a comma-separated string
-                                        });
-                                    }
-                                }}
+                                onChange={handleFileInputChange}
                             />
+                            <div className="flex gap-2 mt-2">
+                                {imagePreviews.map((preview, index) => (
+                                    <div key={index} className="w-20 h-20 rounded overflow-hidden border">
+                                        <img
+                                            src={preview}
+                                            alt={`Preview ${index + 1}`}
+                                            className="object-cover w-full h-full"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                        <div className="mb-2"> {/* Adjusted margin */}
+                        <div className="mb-2">
                             <label className="block text-gray-700">Name</label>
                             <input
                                 type="text"
@@ -484,7 +608,7 @@ export default function ProductsTable() {
                                 }
                             />
                         </div>
-                        <div className="mb-2"> {/* Adjusted margin */}
+                        <div className="mb-2">
                             <label className="block text-gray-700">Description</label>
                             <textarea
                                 className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -498,35 +622,28 @@ export default function ProductsTable() {
                                 rows={4}
                             />
                         </div>
-                        <div className="mb-2"> {/* Adjusted margin */}
+                        <div className="mb-2">
                             <label className="block text-gray-700">Category</label>
-                            <input
-                                type="text"
+                            <select
                                 className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={editingProduct.category}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                                     setEditingProduct({
                                         ...editingProduct,
                                         category: e.target.value,
                                     })
                                 }
-                            />
+                            >
+                                <option value="">Select Category</option>
+                                <option value="baju">Baju</option>
+                                <option value="celana">Celana</option>
+                                <option value="sepatu">Sepatu</option>
+                                <option value="tas">Tas</option>
+                                <option value="jaket">Jaket</option>
+                                <option value="baju bayi">Baju Bayi</option>
+                            </select>
                         </div>
-                        <div className="mb-2"> {/* Adjusted margin */}
-                            <label className="block text-gray-700">Tag</label>
-                            <input
-                                type="text"
-                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={editingProduct.tag}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                    setEditingProduct({
-                                        ...editingProduct,
-                                        tag: e.target.value,
-                                    })
-                                }
-                            />
-                        </div>
-                        <div className="mb-2"> {/* Adjusted margin */}
+                        <div className="mb-2">
                             <label className="block text-gray-700">Price</label>
                             <input
                                 type="number"
@@ -540,20 +657,6 @@ export default function ProductsTable() {
                                 }
                             />
                         </div>
-                        <div className="mb-2"> {/* Adjusted margin */}
-                            <label className="block text-gray-700">Quantity</label>
-                            <input
-                                type="number"
-                                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={editingProduct.quantity}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                    setEditingProduct({
-                                        ...editingProduct,
-                                        quantity: parseInt(e.target.value, 10),
-                                    })
-                                }
-                            />
-                        </div>
                         <div className="flex justify-end gap-2">
                             <Button
                                 onClick={handleSave}
@@ -563,6 +666,44 @@ export default function ProductsTable() {
                             </Button>
                             <Button
                                 onClick={handleCloseModal}
+                                className="bg-gray-500 hover:bg-gray-600 text-white"
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isQtyModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 mt-20">
+                    <div className="bg-white p-4 rounded-md shadow-md w-1/3">
+                        <h2 className="text-xl font-bold mb-4">Edit Quantities</h2>
+                        {Object.keys(sizeQuantities).map((size) => (
+                            <div key={size} className="mb-2">
+                                <label className="block text-gray-700">{size}</label>
+                                <input
+                                    type="number"
+                                    className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value={sizeQuantities[size as keyof typeof sizeQuantities]}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                        setSizeQuantities({
+                                            ...sizeQuantities,
+                                            [size]: parseInt(e.target.value, 10),
+                                        })
+                                    }
+                                />
+                            </div>
+                        ))}
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                onClick={handleSaveQuantities}
+                                className="bg-green-500 hover:bg-green-600 text-white"
+                            >
+                                Save
+                            </Button>
+                            <Button
+                                onClick={handleCloseQtyModal}
                                 className="bg-gray-500 hover:bg-gray-600 text-white"
                             >
                                 Cancel

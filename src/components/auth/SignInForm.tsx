@@ -32,7 +32,7 @@ export default function SignInForm() {
     console.log("Password:", password);
 
     try {
-      const response = await fetch("http://localhost:8000/login", {
+      const response = await fetch("http://localhost:8000/loginadmin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -61,7 +61,7 @@ const navItems: NavItem[] = [
     path: "/product-table"
   },
   {
-    name: "Order",
+    name: "Orders",
     icon: <PageIcon/>,
     path: "/order-table"
   },

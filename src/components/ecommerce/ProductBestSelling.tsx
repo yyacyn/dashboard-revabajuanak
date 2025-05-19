@@ -101,66 +101,60 @@ function ProductBestSelling() {
                 <h2 className="text-xl font-bold text-gray-800 dark:text-white">
                     Best Selling Products
                 </h2>
-                {/* <div className="relative w-64">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
-                        <Search size={18} />
-                    </span>
-                    <input
-                        type="text"
-                        placeholder="Search products..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div> */}
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full table-auto text-sm text-left">
-                    <thead className="bg-gray-100 text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-200">
-                        <tr>
-                            <th className="px-4 py-3">Image</th>
-                            <th className="px-4 py-3">Name</th>
-                            <th className="px-4 py-3">Description</th>
-                            <th className="px-4 py-3">Category</th>
-                            <th className="px-4 py-3">Price</th>
-                            <th className="px-4 py-3">Quantity Sold</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredProducts.map((product) => (
-                            <tr
-                                key={product.id}
-                                className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td className="px-4 py-3">
-                                    <div className="w-12 h-12 rounded overflow-hidden">
-                                        <img
-                                            src={`http://localhost:8000/uploads/products/${product.id}/1.jpg`}
-                                            alt={product.name}
-                                            className="object-cover w-full h-full"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src =
-                                                    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1200px-No-Image-Placeholder.svg.png";
-                                            }}
-                                        />
-                                    </div>
-                                </td>
-                                <td className="px-4 py-3 max-w-[300px] min-w-[200px]">{product.name}</td>
-                                <td className="px-4 py-3 whitespace-normal break-words max-w-[500px] min-w-[300px]">
-                                    {product.description}
-                                </td>
-                                <td className="px-4 py-3">{product.category}</td>
-                                <td className="px-4 py-3">
-                                    {product.price.toLocaleString("id-ID", {
-                                        style: "currency",
-                                        currency: "IDR",
-                                    })}
-                                </td>
-                                <td className="px-4 py-3">{product.quantity}</td>
+                {filteredProducts.length > 0 ? (
+                    <table className="w-full table-auto text-sm text-left">
+                        <thead className="bg-gray-100 text-gray-700 uppercase dark:bg-gray-700 dark:text-gray-200">
+                            <tr>
+                                <th className="px-4 py-3">Image</th>
+                                <th className="px-4 py-3">Name</th>
+                                <th className="px-4 py-3">Description</th>
+                                <th className="px-4 py-3">Category</th>
+                                <th className="px-4 py-3">Price</th>
+                                <th className="px-4 py-3">Quantity Sold</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {filteredProducts.map((product) => (
+                                <tr
+                                    key={product.id}
+                                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <td className="px-4 py-3">
+                                        <div className="w-12 h-12 rounded overflow-hidden">
+                                            <img
+                                                src={`http://localhost:8000/uploads/products/${product.id}/1.jpg`}
+                                                alt={product.name}
+                                                className="object-cover w-full h-full"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src =
+                                                        "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1200px-No-Image-Placeholder.svg.png";
+                                                }}
+                                            />
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 max-w-[300px] min-w-[200px]">{product.name}</td>
+                                    <td className="px-4 py-3 whitespace-normal break-words max-w-[500px] min-w-[300px]">
+                                        {product.description}
+                                    </td>
+                                    <td className="px-4 py-3">{product.category}</td>
+                                    <td className="px-4 py-3">
+                                        {product.price.toLocaleString("id-ID", {
+                                            style: "currency",
+                                            currency: "IDR",
+                                        })}
+                                    </td>
+                                    <td className="px-4 py-3">{product.quantity}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <div className="text-center text-gray-500 dark:text-gray-400">
+                        No products sold yet.
+                    </div>
+                )}
             </div>
         </div>
     );
