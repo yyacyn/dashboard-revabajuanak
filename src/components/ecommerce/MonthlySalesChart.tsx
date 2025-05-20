@@ -4,7 +4,7 @@ import { ApexOptions } from "apexcharts";
 // import { DropdownItem } from "../ui/dropdown/DropdownItem";
 // import { MoreDotIcon } from "../../icons";
 import { useState, useEffect } from "react";
-import { useMemo } from "react";
+// import { useMemo } from "react";
 
 interface OrderDetail {
   Order: {
@@ -17,7 +17,7 @@ interface OrderDetail {
 
 export default function MonthlySalesChart() {
   const [series, setSeries] = useState([{ name: "Sales", data: Array(12).fill(0) }]);
-  const [isOpen, setIsOpen] = useState(false);
+  // const [isOpen, setIsOpen] = useState(false);
 
   const options: ApexOptions = {
     colors: ["#465fff"],
@@ -132,13 +132,13 @@ export default function MonthlySalesChart() {
     fetchData();
   }, []);
 
-  function toggleDropdown() {
-    setIsOpen(!isOpen);
-  }
+  // function toggleDropdown() {
+  //   setIsOpen(!isOpen);
+  // }
 
-  function closeDropdown() {
-    setIsOpen(false);
-  }
+  // function closeDropdown() {
+  //   setIsOpen(false);
+  // }
 
   
 
