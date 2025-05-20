@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, } from "react";
+import { Link } from "react-router";
 import {
     Table,
     TableBody,
@@ -7,21 +8,22 @@ import {
     TableRow,
 } from "../../ui/table";
 import Button from "../../ui/button/Button";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+// import jsPDF from "jspdf";
+// import autoTable from "jspdf-autotable";
 import { FaSyncAlt } from "react-icons/fa"; // Import the refresh icon
 // import RecentOrders from "../../ecommerce/RecentOrders";
 
 
 // Extend jsPDF to include autoTable
-declare module "jspdf" {
-    interface jsPDF {
-        autoTable: typeof autoTable;
-    }
-}
+// declare module "jspdf" {
+//     interface jsPDF {
+//         autoTable: typeof autoTable;
+//     }
+// }
 
 interface OrderDetail {
     id: number;
+    order_id: number;
     invoice: string;
     product_name: string;
     quantity: number;
@@ -51,6 +53,7 @@ export default function OrdersTable() {
 
                     const fetchedOrderDetails = sortedOrderDetails.map((order: any) => ({
                         id: order.ID,
+                        order_id: order.Order.ID,
                         invoice: order.Order.invoice,
                         product_name: order.Produk?.nama_produk || "N/A",
                         quantity: order.total_produk,
@@ -93,6 +96,7 @@ export default function OrdersTable() {
                     const updatedOrderDetails = sortedOrderDetails.map((order: any) => ({
                         id: order.ID,
                         invoice: order.Order.invoice,
+                        order_id: order.Order.ID,
                         product_name: order.Produk?.nama_produk || "N/A",
                         quantity: order.total_produk,
                         total_price: order.harga_total,
@@ -130,32 +134,32 @@ export default function OrdersTable() {
         setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
     };
 
-    const generatePDF = () => {
-        const doc = new jsPDF();
-        doc.text(`Orders Report (Page ${currentPage})`, 14, 10);
+    // const generatePDF = () => {
+    //     const doc = new jsPDF();
+    //     doc.text(`Orders Report (Page ${currentPage})`, 14, 10);
 
-        // Use currentOrders for the current page
-        const tableData = currentOrders.map((order) => [
-            order.invoice,
-            order.product_name,
-            order.quantity,
-            `Rp. ${order.total_price.toLocaleString()}`,
-            order.payment_method,
-            order.buyer_name,
-            order.date,
-            order.status,
-        ]);
+    //     // Use currentOrders for the current page
+    //     const tableData = currentOrders.map((order) => [
+    //         order.invoice,
+    //         order.product_name,
+    //         order.quantity,
+    //         `Rp. ${order.total_price.toLocaleString()}`,
+    //         order.payment_method,
+    //         order.buyer_name,
+    //         order.date,
+    //         order.status,
+    //     ]);
 
-        // Generate table in PDF
-        autoTable(doc, {
-            head: [["Invoice", "Product Name", "Quantity", "Total Price", "Payment Method", "Buyer Name", "Date", "Status"]],
-            body: tableData,
-            startY: 20,
-        });
+    //     // Generate table in PDF
+    //     autoTable(doc, {
+    //         head: [["Invoice", "Product Name", "Quantity", "Total Price", "Payment Method", "Buyer Name", "Date", "Status"]],
+    //         body: tableData,
+    //         startY: 20,
+    //     });
 
-        // Save the PDF
-        doc.save(`orders_report_page_${currentPage}.pdf`);
-    };
+    //     // Save the PDF
+    //     doc.save(`orders_report_page_${currentPage}.pdf`);
+    // };
 
     return (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -169,14 +173,14 @@ export default function OrdersTable() {
                             value={searchQuery}
                             onChange={handleSearch}
                         />
-                        <div className="flex items-center gap-2">
+                        {/* <div className="flex items-center gap-2">
                             <Button
                                 className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
                                 onClick={generatePDF}
                             >
                                 Download Current Page Report
                             </Button>
-                        </div>
+                        </div> */}
                     </div>
                     <Table className="table-auto w-full">
                         {/* Table Header */}
@@ -238,7 +242,12 @@ export default function OrdersTable() {
                             {currentOrders.map((detail) => (
                                 <TableRow key={detail.id}>
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                        {detail.invoice}
+                                        <Link
+                                            to={`/invoice/${detail.order_id}`} // Navigate to the invoice details page
+                                            className="text-blue-500 hover:underline" target="_blank"
+                                        >
+                                            {detail.invoice}
+                                        </Link>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                         {detail.product_name}
@@ -258,29 +267,26 @@ export default function OrdersTable() {
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                         {detail.date}
                                     </TableCell>
-                                    <TableCell
-                                        className={`px-4 py-3 text-center text-theme-sm font-medium rounded ${detail.status === "cancelled"
-                                                ? "bg-red-100 text-red-500"
-                                                : detail.status === "pending"
-                                                    ? "bg-yellow-100 text-yellow-500 hover:bg-yellow-200"
-                                                    : detail.status === "success"
-                                                        ? "bg-green-100 text-green-500"
-                                                        : "bg-gray-100 text-gray-500"
-                                            }`}
-                                    >
+                                    <TableCell className="py-3 text-theme-sm">
                                         {detail.status === "pending" ? (
-                                            <div className="flex items-center justify-center gap-1 "onClick={() => handleStatusClick(detail.id, detail.status)}>
-                                                <button
-                                                    className="h-full"
-                                                >
+                                            <div className="flex items-center gap-2">
+                                                <span className="px-2 py-1 rounded-full text-white text-xs font-medium bg-yellow-500">
                                                     {detail.status}
-                                                </button>
+                                                </span>
                                                 <FaSyncAlt
-                                                    className="text-yellow-500 cursor-pointer"
+                                                    className="text-yellow-500 cursor-pointer hover:text-yellow-600"
+                                                    onClick={() => handleStatusClick(detail.order_id, detail.status)}
                                                 />
                                             </div>
                                         ) : (
-                                            detail.status
+                                            <span
+                                                className={`px-2 py-1 rounded-full text-white text-xs font-medium ${detail.status === "success"
+                                                        ? "bg-green-500"
+                                                        : "bg-red-500"
+                                                    }`}
+                                            >
+                                                {detail.status}
+                                            </span>
                                         )}
                                     </TableCell>
                                 </TableRow>

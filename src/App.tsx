@@ -15,6 +15,7 @@ import BarChart from "./pages/Charts/BarChart";
 import Calendar from "./pages/Calendar";
 import ProductTable from "./pages/Tables/ProductTable";
 import OrderTable from "./pages/Tables/OrderTable";
+import InvoiceDetailsPage from "./pages/OtherPage/InvoiceDetailsPage";
 import FormElements from "./pages/Forms/FormElements";
 import AddProduct from "./pages/Forms/AddProducts";
 import Blank from "./pages/Blank";
@@ -24,6 +25,7 @@ import Home from "./pages/Dashboard/Home";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+
 
 // Add the PathTracker component in the same file
 import { ReactNode } from "react";
@@ -140,6 +142,7 @@ const AppWithAuth = () => {
                 </ProtectedRoute>
               }
             />
+            
             <Route
               path="/badge"
               element={
@@ -191,6 +194,7 @@ const AppWithAuth = () => {
               }
             />
           </Route>
+          <Route path="/invoice/:id" element={<InvoiceDetailsPage />} />
 
           {/* Auth Layout */}
           <Route path="/signin" element={<SignIn />} />

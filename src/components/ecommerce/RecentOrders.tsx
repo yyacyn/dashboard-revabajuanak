@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router";
 import {
     Table,
     TableBody,
@@ -142,13 +143,18 @@ export default function RecentOrders() {
                     <TableBody className="divide-y divide-gray-100 dark:divide-gray-800">
                         {recentOrders.map((order) => (
                             <TableRow key={order.id}>
-                                <TableCell className="py-3 text-gray-800 text-theme-sm dark:text-white/90">
-                                    {order.invoice}
-                                </TableCell>
-                                <TableCell className="py-3 text-gray-800 text-theme-sm dark:text-white/90">
+                                    <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400 w-[150px]">
+                                        <Link
+                                            to={`/invoice/${order.order_id}`} // Navigate to the invoice details page
+                                            className="text-blue-500 hover:underline" target="_blank"
+                                        >
+                                            {order.invoice}
+                                        </Link>
+                                    </TableCell>
+                                <TableCell className="py-3 text-gray-800 text-theme-sm dark:text-white/90 w-[30%]">
                                     {order.product_name}
                                 </TableCell>
-                                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">
+                                <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400 w-[20%]">
                                     {order.buyer_name}
                                 </TableCell>
                                 <TableCell className="py-3 text-gray-500 text-theme-sm dark:text-gray-400">

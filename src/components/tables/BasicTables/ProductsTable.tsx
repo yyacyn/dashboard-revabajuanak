@@ -56,6 +56,7 @@ export default function ProductsTable() {
         setSearchQuery(e.target.value);
     };
 
+
     const [isQtyModalOpen, setIsQtyModalOpen] = useState(false);
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
     const [sizeQuantities, setSizeQuantities] = useState({
@@ -201,9 +202,30 @@ export default function ProductsTable() {
         setIsModalOpen(true);
     };
 
-    const handleEdit = (product: Product) => {
+    const handleEdit = async (product: Product) => {
         setEditingProduct(product);
-        setImagePreviews([]); // Reset previews
+
+        const imageUrls: string[] = [];
+        let index = 1;
+
+        while (true) {
+            const imageUrl = `http://localhost:8000/uploads/products/${product.id}/${index}.jpg`;
+
+            // Check if the image exists by attempting to fetch it
+            try {
+                const response = await fetch(imageUrl, { method: "HEAD" });
+                if (!response.ok) {
+                    break; // Stop if the image does not exist
+                }
+                imageUrls.push(imageUrl); // Add the valid image URL to the list
+            } catch {
+                break; // Stop if there's an error fetching the image
+            }
+
+            index++;
+        }
+
+        setImagePreviews(imageUrls); // Populate previews with available images
         setIsModalOpen(true);
     };
 
@@ -571,9 +593,11 @@ export default function ProductsTable() {
 
             {/* Edit Product Modal */}
             {isModalOpen && editingProduct && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 mt-20">
-                    <div className="bg-white p-4 rounded-md shadow-md w-1/3">
-                        <h2 className="text-xl font-bold mb-4">{editingProduct.id === 0 ? "Add Product" : "Edit Product"}</h2>
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-4 rounded-md shadow-md w-full max-w-lg max-h-[80vh] overflow-y-auto">
+                        <h2 className="text-xl font-bold mb-4">
+                            {editingProduct.id === 0 ? "Add Product" : "Edit Product"}
+                        </h2>
                         <div className="mb-2">
                             <label className="block text-gray-700">Images</label>
                             <input
@@ -582,9 +606,12 @@ export default function ProductsTable() {
                                 className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 onChange={handleFileInputChange}
                             />
-                            <div className="flex gap-2 mt-2">
+                            <div className="flex gap-2 mt-2 overflow-x-auto max-w-full p-2 border rounded-md">
                                 {imagePreviews.map((preview, index) => (
-                                    <div key={index} className="w-20 h-20 rounded overflow-hidden border">
+                                    <div
+                                        key={index}
+                                        className="relative w-40 h-40 flex-shrink-0 rounded overflow-hidden border"
+                                    >
                                         <img
                                             src={preview}
                                             alt={`Preview ${index + 1}`}
