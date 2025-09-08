@@ -17,7 +17,7 @@ export default function EcommerceMetrics() {
 
     useEffect(() => {
         // Fetch orders data from the API
-        fetch("http://localhost:8000/orders")
+        fetch("https://backend-go-gin-production.up.railway.app/orders")
             .then((response) => response.json())
             .then((data) => {
                 if (Array.isArray(data.order_details)) {
@@ -73,7 +73,7 @@ export default function EcommerceMetrics() {
 
     useEffect(() => {
         // Fetch products data from the API
-        fetch("http://localhost:8000/products")
+        fetch("https://backend-go-gin-production.up.railway.app/products")
             .then((response) => response.json())
             .then((data) => {
                 if (Array.isArray(data.products)) {

@@ -105,7 +105,7 @@ export default function MonthlySalesChart() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:8000/orders");
+        const response = await fetch("https://backend-go-gin-production.up.railway.app/orders");
         const data = await response.json();
 
         if (Array.isArray(data.order_details)) {

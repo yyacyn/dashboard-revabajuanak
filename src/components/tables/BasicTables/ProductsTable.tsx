@@ -33,7 +33,7 @@ export default function ProductsTable() {
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
     useEffect(() => {
-        fetch("http://localhost:8000/products")
+        fetch("https://backend-go-gin-production.up.railway.app/products")
             .then((response) => response.json())
             .then((data) => {
                 const fetchedProducts = data.products.map((product: any) => ({
@@ -72,7 +72,7 @@ export default function ProductsTable() {
         setIsQtyModalOpen(true);
 
         // Fetch existing quantities for the product
-        fetch(`http://localhost:8000/products/${productId}/sizes`)
+        fetch(`https://backend-go-gin-production.up.railway.app/products/${productId}/sizes`)
             .then((response) => response.json())
             .then((data) => {
                 // Map the sizes from the response to the sizeQuantities state
@@ -106,7 +106,7 @@ export default function ProductsTable() {
 
             console.log("Payload being sent:", payload); // Log the payload
 
-            fetch(`http://localhost:8000/products/${selectedProductId}/sizes`, {
+            fetch(`https://backend-go-gin-production.up.railway.app/products/${selectedProductId}/sizes`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -127,7 +127,7 @@ export default function ProductsTable() {
                     Swal.fire("Updated!", "Quantities have been updated.", "success");
 
                     // Refetch the products to update the list
-                    fetch("http://localhost:8000/products")
+                    fetch("https://backend-go-gin-production.up.railway.app/products")
                         .then((response) => response.json())
                         .then((data) => {
                             const fetchedProducts = data.products.map((product: any) => ({
@@ -167,7 +167,7 @@ export default function ProductsTable() {
             confirmButtonText: 'Yes, delete it!'
         }).then((result) => {
             if (result.isConfirmed) {
-                fetch(`http://localhost:8000/delproducts/${id}`, {
+                fetch(`https://backend-go-gin-production.up.railway.app/delproducts/${id}`, {
                     method: 'DELETE',
                 })
                     .then((response) => {
@@ -209,7 +209,7 @@ export default function ProductsTable() {
         let index = 1;
 
         while (true) {
-            const imageUrl = `http://localhost:8000/uploads/products/${product.id}/${index}.jpg`;
+            const imageUrl = `https://backend-go-gin-production.up.railway.app/uploads/products/${product.id}/${index}.jpg`;
 
             // Check if the image exists by attempting to fetch it
             try {
@@ -251,7 +251,7 @@ export default function ProductsTable() {
         });
 
         try {
-            const response = await fetch(`http://localhost:8000/upload/products/${productId}`, {
+            const response = await fetch(`https://backend-go-gin-production.up.railway.app/upload/products/${productId}`, {
                 method: "POST",
                 body: formData,
             });
@@ -272,7 +272,7 @@ export default function ProductsTable() {
         if (editingProduct) {
             if (editingProduct.id === 0) {
                 // Add new product
-                fetch("http://localhost:8000/addproducts", {
+                fetch("https://backend-go-gin-production.up.railway.app/addproducts", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -304,7 +304,7 @@ export default function ProductsTable() {
                         if (fileInput?.files?.length) {
                             handleFileUpload(productId, fileInput.files).then(() => {
                                 // Refresh the product list to update the image
-                                fetch("http://localhost:8000/products")
+                                fetch("https://backend-go-gin-production.up.railway.app/products")
                                     .then((response) => response.json())
                                     .then((data) => {
                                         const fetchedProducts = data.products.map((product: any) => ({
@@ -330,7 +330,7 @@ export default function ProductsTable() {
                     });
             } else {
                 // Edit existing product
-                fetch(`http://localhost:8000/editproducts/${editingProduct.id}`, {
+                fetch(`https://backend-go-gin-production.up.railway.app/editproducts/${editingProduct.id}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
@@ -365,7 +365,7 @@ export default function ProductsTable() {
                         if (fileInput?.files?.length) {
                             handleFileUpload(Number(editingProduct.id), fileInput.files).then(() => {
                                 // Refresh the product list to update the image
-                                fetch("http://localhost:8000/products")
+                                fetch("https://backend-go-gin-production.up.railway.app/products")
                                     .then((response) => response.json())
                                     .then((data) => {
                                         const fetchedProducts = data.products.map((product: any) => ({
@@ -503,7 +503,7 @@ export default function ProductsTable() {
                                 <TableRow key={product.id}>
                                     <TableCell className="px-0 py-4 w-auto sm:px-6 mx-0 whitespace-nowrap">
                                         <img
-                                            src={`http://localhost:8000/uploads/products/${product.image}/1.jpg` || "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1200px-No-Image-Placeholder.svg.png"}
+                                            src={`https://backend-go-gin-production.up.railway.app/uploads/products/${product.image}/1.jpg` || "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/1200px-No-Image-Placeholder.svg.png"}
                                             alt={product.name}
                                             className="w-20 h-20 object-cover rounded"
                                             onError={(e) => {
@@ -664,9 +664,6 @@ export default function ProductsTable() {
                                 <option value="">Select Category</option>
                                 <option value="baju">Baju</option>
                                 <option value="celana">Celana</option>
-                                <option value="sepatu">Sepatu</option>
-                                <option value="tas">Tas</option>
-                                <option value="jaket">Jaket</option>
                                 <option value="baju bayi">Baju Bayi</option>
                             </select>
                         </div>

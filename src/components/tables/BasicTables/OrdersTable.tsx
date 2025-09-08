@@ -42,7 +42,7 @@ export default function OrdersTable() {
     const ordersPerPage = 10;
 
     useEffect(() => {
-        fetch("http://localhost:8000/orders")
+        fetch("https://backend-go-gin-production.up.railway.app/orders")
             .then((response) => response.json())
             .then((data) => {
                 if (Array.isArray(data.order_details)) {
@@ -78,14 +78,14 @@ export default function OrdersTable() {
     const handleStatusClick = async (id: number, status: string) => {
         if (status === "pending") {
             try {
-                const response = await fetch(`http://localhost:8000/payment/notification/${id}`, {
+                const response = await fetch(`https://backend-go-gin-production.up.railway.app/payment/notification/${id}`, {
                     method: "POST",
                 });
                 const data = await response.json();
                 console.log(data.message);
 
                 // Refresh the table by re-fetching the data
-                const refreshedResponse = await fetch("http://localhost:8000/orders");
+                const refreshedResponse = await fetch("https://backend-go-gin-production.up.railway.app/orders");
                 const refreshedData = await refreshedResponse.json();
 
                 if (Array.isArray(refreshedData.order_details)) {
