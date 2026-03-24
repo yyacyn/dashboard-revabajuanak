@@ -32,7 +32,7 @@ export default function SignInForm() {
     console.log("Password:", password);
 
     try {
-      const response = await fetch("http://localhost:8000/loginadmin", {
+      const response = await fetch("https://backend-go-gin-production.up.railway.app/loginadmin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

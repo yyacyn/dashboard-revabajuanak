@@ -32,7 +32,7 @@ export default function RecentOrders() {
 
     const fetchRecentOrders = () => {
         setLoading(true);
-        fetch("http://localhost:8000/orders")
+        fetch("https://backend-go-gin-production.up.railway.app/orders")
             .then((response) => response.json())
             .then((data) => {
                 if (Array.isArray(data.order_details)) {

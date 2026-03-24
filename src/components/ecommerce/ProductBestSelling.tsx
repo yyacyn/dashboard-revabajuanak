@@ -37,8 +37,8 @@ export default function ProductBestSelling() {
             try {
                 // Fetch orders and products data
                 const [ordersResponse, productsResponse] = await Promise.all([
-                    fetch("http://localhost:8000/orders"),
-                    fetch("http://localhost:8000/products"),
+                    fetch("https://backend-go-gin-production.up.railway.app/orders"),
+                    fetch("https://backend-go-gin-production.up.railway.app/products"),
                 ])
 
                 const ordersData = await ordersResponse.json()
@@ -166,7 +166,7 @@ export default function ProductBestSelling() {
                                     <TableCell className="py-3">
                                         <div className="w-20 h-20 rounded overflow-hidden">
                                             <img
-                                                src={`http://localhost:8000/uploads/products/${product.id}/1.jpg`}
+                                                src={`https://backend-go-gin-production.up.railway.app/uploads/products/${product.id}/1.jpg`}
                                                 alt={product.name}
                                                 className="object-cover w-full h-full"
                                                 onError={(e) => {
