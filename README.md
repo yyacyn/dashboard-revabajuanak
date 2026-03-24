@@ -1,70 +1,106 @@
-# Getting Started with Create React App
+# Reva Baju Anak — E-Commerce Platform
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> Full-stack e-commerce platform and admin dashboard for **Reva Baju Anak**.  
+> Provides a complete digital storefront for customers and a specialized inventory/order management dashboard for administrators.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Tech Stack
 
-### `npm start`
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React 18, Vite, Tailwind CSS |
+| **Admin Dashboard** | React 18, Vite, TailAdmin Template |
+| **Backend** | Go (Gin), PostgreSQL, JWT Authentication |
+| **Media / Storage** | Local Multipart Uploads |
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Key Features
 
-### `npm test`
+### 🛍️ Client Storefront
+- **Product Catalog** — Browse clothing items with variations in sizes and stock
+- **Shopping Cart** — Add, update, and remove items with real-time stock validations
+- **Order Management** — Checkout process and individual order history tracking
+- **User Profiles** — Manage personal details, addresses, and email verification
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 📊 Admin Dashboard
+- **Product & Inventory Management** — Full CRUD for products, size variations, and image uploads
+- **Order Processing** — Track incoming orders, manage statuses, and view complete transaction details
+- **User Management** — View and manage registered customers and their data
 
-### `npm run build`
+### 🔐 Authentication & Security
+- JWT-based authentication with role-based access control
+- Two distinct roles: **Admin** (inventory/order management) and **User** (shopping/checkout)
+- Email verification system for new user registrations
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Architecture
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```text
+┌─────────────────┐     ┌─────────────────┐
+│ Client Store    │     │ Admin Dashboard │
+│ React + Vite    │     │ React + Vite    │
+└────────┬─────────┘     └────────┬─────────┘
+         │                        │
+         └────────────┬───────────┘
+                      │
+              ┌───────▼────────┐
+              │   Go Backend   │
+              │   Gin + JWT    │
+              │   REST API     │
+              └───────┬────────┘
+                      │
+              ┌───────▼────────┐
+              │   PostgreSQL   │
+              │   11 Tables    │
+              │   Auto-migrate │
+              └────────────────┘
+```
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Backend API Overview
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**25+ RESTful endpoints** managed by Go (Gin):
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+| Domain | Endpoints | Highlights |
+|--------|-----------|------------|
+| Auth | Login, Register, Verify | Admin vs User separation, JWT via headers |
+| Products | CRUD, Sizes, Uploads | Multipart file uploads (3MB limit), stock junction tables |
+| Cart | Add, Update, Remove | Protected routes, cart-to-order transition logic |
+| Orders | Checkout, Webhooks | Payment notifications webhook, order status updates |
+| Users | Profile, History | Relational mapping via `user_details` |
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However, we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+---
 
-## Learn More
+## Database Schema
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+11 inter-connected tables utilizing automated Go struct migrations:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+`users` · `user_details` · `produks` · `ukurans` · `produk_ukuran_stocks` · `carts` · `cart_details` · `orders` · `order_details` · `payments` · `ulasans`
 
-### Code Splitting
+---
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+## Notable Technical Decisions
 
-### Analyzing the Bundle Size
+- **Relational Stock Management** — Utilized junction tables (`produk_ukuran_stocks`) to accurately map specific stock quantities to distinct size variations per product.
+- **Payment Webhook Integration** — Designed a secure `/payment/notification/:id` endpoint to ingest external payment gateway updates asynchronously.
+- **Cart-to-Order Pipeline** — Seamless transactional transition from temporary user carts to permanent immutable orders upon checkout.
+- **Role-Based Middlewares** — Custom Gin middleware (`AuthMiddleware`) to restrict access based on extracted JWT claims.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+---
 
-### Making a Progressive Web App
+## How to Run Locally
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+### 1. Frontend Setup
+1. Clone the repository.
+2. Run `npm install` in the root directory to install dependencies.
+3. Run `npm run dev` to start the frontend development server on port 5173.
 
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+### 2. Backend Setup
+1. Navigate to the `backend-go-gin` directory.
+2. Make sure you have Go and PostgreSQL installed.
+3. Configure your database connection in the environment configurations.
+4. Run `go run main.go` to start the backend Gin server on port 8000.
